@@ -10,6 +10,7 @@ import (
 
 	ba "bdobot/bdoapi"
 	"bdobot/tgbot/chatstate"
+	"bdobot/tgbot/itemRouting"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -45,7 +46,6 @@ var (
 		mainC int
 		subC int
 	})
-	
 )
 
 func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
@@ -74,10 +74,16 @@ func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	bot.Request(msg)
 }
 
-func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string) {
+func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, indexMC int, indexSC int) {
 	var message string
+	// chatID := update.CallbackQuery.Message.Chat.ID
+	var buttons []string
 	var keyboard tgbotapi.InlineKeyboardMarkup
+	// items := FillItems()
 
+	var switchRout bool
+	var itemrout bool
+	
 	switch state {
 	case "start":
 		keyboard = CreateKeyboard(startkeyboard, 2)
@@ -87,18 +93,34 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string) {
 		keyboard = CreateKeyboard([]string{"Осн. оружие", "Броня", "Аксессуары", "Назад"}, 2)
 		message = "Выберите категорию предмета"
 
-	case "armour":
-		
 	case "weapon":
 		keyboard = CreateKeyboard([]string{"Меч", "Назад"}, 2)
 		message = "Вы выбрали категорию: Оружие"
-	case "sword":
-		// 	keyboard = CreateKeyboard([]string{"Меч Элси", "Назад"}, 2)
-		// 	message = "Выберите предмет:"
 
+	case "MainCRouting":
+		switch indexMC{
+		case 1:
+			buttons, message = itemrouting.MainCRouting(1)
+			keyboard = CreateKeyboard(buttons, 2)
+		case 2:
+			buttons, message = itemrouting.MainCRouting(2)
+			keyboard = CreateKeyboard(buttons, 2)
+		case 3:
+			buttons, message = itemrouting.MainCRouting(3)
+			keyboard = CreateKeyboard(buttons, 2)
+		}
+	case "SubCRouting":
+		
+		itemrout = true
+		return
+	case "switchRouting":
+
+		switchRout = true
 	}
 
-	EditMessage(update, bot, message, keyboard)
+	if itemrout != true && switchRout != true {
+		EditMessage(update, bot, message, keyboard)
+	}
 }
 
 
@@ -107,30 +129,60 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	chatID := update.CallbackQuery.Message.Chat.ID
 	data := strings.ToLower(update.CallbackQuery.Data)
 	chatState := chatstate.GetInstance() // Get the singleton instance
-	
 
 	var nextState string
 	isPrev := false
+	var indexMC int = 0
+	var indexSC int = 0
 
 	switch data {
+	//--------------------------------StartRotate--------------------------------
 	case "поиск предмета_callback":
 		nextState = "search"
+	case "предметы на отслеж._callback":
+
+
+	//--------------------------------MainCategories--------------------------------
 	case "осн. оружие_callback":
-		nextState = "weapon"
-	case "меч_callback":
-		nextState = "sword"
-		ItemRouting( bot, update, 1, 1) // itemRouting заменить функционал на ItemOP, и переместить в handleMessage, там же сдеать обработку пред, след, и обрабатывать состояния в виде map например: chatstate[subC]int, sword, текущее состояние подкатегории, int индекс предмета, который будет соответственно меняться при обработке пред, след
-		return
+		nextState = "MainCRouting"
+		indexMC = 1
+
 	case "броня_callback":
-		nextState = "armour"
+		nextState = "MainCRouting"
+		indexMC = 2
+	case "бижутерия_callback":
+		nextState = "MainCRouting"
+		indexMC = 3
+
+	//--------------------------------SubCatogories--------------------------------
+	case "меч_callback":
+		nextState = "itemsRouting"
+		indexSC = 1
+	case "лук_callback":
+		nextState = "itemsRouting"
+		indexSC = 1
+	case "Шлем":
+		nextState = "itemsRouting"
+		indexSC = 2
+	case "Доспехи":
+		nextState = "itemsRouting"
+		indexSC = 2
+	case "Кольцо":
+		nextState = "itemsRouting"
+		indexSC = 3
+	case "Ожерелье":
+		nextState = "itemsRouting"
+		indexSC = 3
+	//--------------------------------switchStates--------------------------------
+	case "предыдущий_callback":
+		nextState = "switchRouting"
+
+	case "следующий_callback":
+		nextState = "switchRouting"
+
 	case "назад_callback":
 		nextState = chatState.PopState(chatID)
 		isPrev = true
-	case "предыдущий_callback":
-		
-	case "следующий_callback":
-		
-
 	default:
 		log.Printf("unknown callback data: %v\n", data)
 	}
@@ -139,10 +191,9 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		if !isPrev {
 			chatState.PushState(chatID, nextState)
 		}
-		StateRouter(bot, update, nextState)
+		StateRouter(bot, update, nextState, indexMC, indexSC)
 	}
 }
-
 
 
 func ItemRouting(bot *tgbotapi.BotAPI, update tgbotapi.Update, mainC int, subC int) {
@@ -286,20 +337,8 @@ var startkeyboard = []string{
 	"Поиск предмета", "Отслеж. Товары",
 }
 
-// var mainCategories = []string{
-// 	""
-// }
-
-var subCategories = []string{
-	"Меч", "лук",
-}
-
 var switchKeyboard = []string{
 	"Предыдущий", "отслеживание", "Следующий", "Назад",
-}
-
-func fillKeyboard() ([]string, int) {
-	panic("unimplemented")
 }
 
 func CreateKeyboard(buttons []string, buttonsPerRow int) tgbotapi.InlineKeyboardMarkup {
@@ -317,12 +356,6 @@ func CreateKeyboard(buttons []string, buttonsPerRow int) tgbotapi.InlineKeyboard
 	}
 
 	return tgbotapi.InlineKeyboardMarkup{InlineKeyboard: rows}
-}
-
-func CreateMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string, keyboard tgbotapi.InlineKeyboardMarkup) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
-	msg.ReplyMarkup = keyboard
-	bot.Request(msg)
 }
 
 func EditMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string, keyboard tgbotapi.InlineKeyboardMarkup) {
@@ -343,8 +376,4 @@ func EditMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string, k
 		log.Printf("Ошибка при изменении сообщения: %v", err)
 	}
 
-}
-
-func (b *Bot) AddHandler(command string, handler MessageHandler) {
-	b.handlers[command] = handler
 }

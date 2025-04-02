@@ -49,3 +49,12 @@ func (b *ChatState) InitState(chatID int64, state string) {
 	defer b.mu.Unlock()
 	b.states[chatID] = []string{state}
 }
+
+func (b *ChatState) ChangeState(chatID int64, newstate string) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if len(b.states[chatID]) == 0 {
+		b.InitState(chatID, newstate)
+	}
+	b.states[chatID][len(b.states[chatID])-1] = newstate
+}

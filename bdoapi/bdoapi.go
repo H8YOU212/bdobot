@@ -52,8 +52,8 @@ func GetWorldMarketList(mainCategory int, subCategory int) ([]Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(res)
-	//fmt.Println(string(body))
+	fmt.Println(res)
+	fmt.Println(string(body))
 
 	var items []Item
 
@@ -62,7 +62,7 @@ func GetWorldMarketList(mainCategory int, subCategory int) ([]Item, error) {
 		fmt.Println("parse JSON data error :", err)
 		return nil, err
 	}
-
+	// fmt.Println(items)
 	return items, nil
 
 }
