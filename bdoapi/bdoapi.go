@@ -13,16 +13,16 @@ import (
 const baseUrl = "https://api.arsha.io"
 
 type Item struct {
-	ID           int            `json:"id"`
-	Sid          int            `json:"sid"`
-	Name         string         `json:"name"`
-	Price        int            `json:"price"`
-	BasePrice    int            `json:"basePrice"`
-	History      map[string]int `json:"history"`
-	MainCategory int            `json:"mainCategory"`
-	SubCategory  int            `json:"subCategory"`
-	PriceMin     int            `json:"priceMin"`
-	PriceMax     int            `json:"priceMax"`
+	ID    int    `json:"id"`
+	Sid   int    `json:"sid"`
+	Name  string `json:"name"`
+	Price int    `json:"price"`
+	// BasePrice    int            `json:"basePrice"`
+	// History      map[string]int `json:"history"`
+	// MainCategory int            `json:"mainCategory"`
+	// SubCategory  int            `json:"subCategory"`
+	// PriceMin     int            `json:"priceMin"`
+	// PriceMax     int            `json:"priceMax"`
 }
 
 type MarketPriceInfo struct {

@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-func FillItems(chatID int64, mainC int, subC int) ([]b.Item, error) {
+func FillItems(mainC int, subC int) ([]b.Item, error) {
 	bdoItems, err := b.GetWorldMarketList(mainC, subC)
 	if err != nil {
 		return nil, err
@@ -49,8 +49,6 @@ func FillItems(chatID int64, mainC int, subC int) ([]b.Item, error) {
 		log.Println("error fill items")
 		return nil, fmt.Errorf("error fill items")
 	}
-
-	// itemCache[chatID] = items TODO: realization itemCashe func 
-	itemIndexMap[chatID] = 0
+	
 	return items, nil
 }

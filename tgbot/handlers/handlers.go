@@ -32,11 +32,6 @@ type Config struct {
 	Token string
 }
 
-type Bot struct {
-	bot      *tgbotapi.BotAPI
-	handlers map[string]MessageHandler
-}
-
 type MessageHandler func(*tgbotapi.Message)
 
 var ( 
@@ -47,6 +42,9 @@ var (
 		subC int
 	})
 )
+var indexMC = new(int)
+var indexSC = new(int)
+var curIndex = new(int)
 
 func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	commandName := update.Message.Command()
@@ -74,13 +72,15 @@ func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	bot.Request(msg)
 }
 
-func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, indexMC int, indexSC int) {
+func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, indexMC *int, indexSC *int, curIndex *int) {
 	var message string
 	// chatID := update.CallbackQuery.Message.Chat.ID
 	var buttons []string
 	var keyboard tgbotapi.InlineKeyboardMarkup
-	// items := FillItems()
+	// items := new([]ba.Item)
 
+
+	// curIndex := new(int)
 	var switchRout bool
 	var itemrout bool
 	
@@ -98,24 +98,15 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 		message = "Вы выбрали категорию: Оружие"
 
 	case "MainCRouting":
-		switch indexMC{
-		case 1:
-			buttons, message = itemrouting.MainCRouting(1)
-			keyboard = CreateKeyboard(buttons, 2)
-		case 2:
-			buttons, message = itemrouting.MainCRouting(2)
-			keyboard = CreateKeyboard(buttons, 2)
-		case 3:
-			buttons, message = itemrouting.MainCRouting(3)
-			keyboard = CreateKeyboard(buttons, 2)
-		}
+		buttons, message = itemrouting.MainCRouting(*indexMC)
+		keyboard = CreateKeyboard(buttons, 2)
 	case "SubCRouting":
-		
-		itemrout = true
-		return
+		buttons, message = itemrouting.SubCRouting(*indexMC,*indexSC, curIndex)
+		keyboard = CreateKeyboard(buttons, 3)
 	case "switchRouting":
-
-		switchRout = true
+		buttons, message =itemrouting.SubCRouting(*indexMC, *indexSC, curIndex)
+		// switchRout = true
+		keyboard = CreateKeyboard(buttons, 3)
 	}
 
 	if itemrout != true && switchRout != true {
@@ -132,8 +123,7 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	var nextState string
 	isPrev := false
-	var indexMC int = 0
-	var indexSC int = 0
+	
 
 	switch data {
 	//--------------------------------StartRotate--------------------------------
@@ -145,41 +135,47 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	//--------------------------------MainCategories--------------------------------
 	case "осн. оружие_callback":
 		nextState = "MainCRouting"
-		indexMC = 1
+		*indexMC = 1
 
 	case "броня_callback":
 		nextState = "MainCRouting"
-		indexMC = 2
+		*indexMC = 15
 	case "бижутерия_callback":
 		nextState = "MainCRouting"
-		indexMC = 3
+		*indexMC = 20
 
 	//--------------------------------SubCatogories--------------------------------
 	case "меч_callback":
-		nextState = "itemsRouting"
-		indexSC = 1
+		nextState = "SubCRouting"
+		*indexSC = 1
 	case "лук_callback":
-		nextState = "itemsRouting"
-		indexSC = 1
-	case "Шлем":
-		nextState = "itemsRouting"
-		indexSC = 2
-	case "Доспехи":
-		nextState = "itemsRouting"
-		indexSC = 2
-	case "Кольцо":
-		nextState = "itemsRouting"
-		indexSC = 3
-	case "Ожерелье":
-		nextState = "itemsRouting"
-		indexSC = 3
+		nextState = "SubCRouting"
+		*indexSC = 2
+	case "шлем_callback":
+		nextState = "SubCRouting"
+		*indexSC = 1
+	case "доспехи_callback":
+		nextState = "SubCRouting"
+		*indexSC = 2
+	case "кольцо_callback":
+		nextState = "SubCRouting"
+		*indexSC = 1
+	case "ожерелье_callback":
+		nextState = "SubCRouting"
+		*indexSC = 2
 	//--------------------------------switchStates--------------------------------
 	case "предыдущий_callback":
 		nextState = "switchRouting"
-
+		isPrev = true
+		// if *curIndex >= 0{
+			*curIndex--
+		// }
 	case "следующий_callback":
 		nextState = "switchRouting"
-
+		isPrev = true
+		// if *curIndex <= 0{
+			*curIndex++
+		// }
 	case "назад_callback":
 		nextState = chatState.PopState(chatID)
 		isPrev = true
@@ -191,7 +187,7 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		if !isPrev {
 			chatState.PushState(chatID, nextState)
 		}
-		StateRouter(bot, update, nextState, indexMC, indexSC)
+		StateRouter(bot, update, nextState, indexMC, indexSC, curIndex)
 	}
 }
 
@@ -327,8 +323,6 @@ func FillItems(chatID int64, mainC int, subC int) ([]Item, error) {
 		return nil, fmt.Errorf("error fill items")
 	}
 
-	itemCache[chatID] = items
-	itemIndexMap[chatID] = 0
 	return items, nil
 
 }

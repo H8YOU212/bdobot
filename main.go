@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// bdoapi.GetWorldMarketList(5, 1)
+	// bdoapi.GetWorldMarketList(1, 2)
 	// bdohandler.OutputItemData()
 	tgbot.StartTelegramBotLoop()
 	// h.FillItems(1, 1)

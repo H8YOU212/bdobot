@@ -8,11 +8,11 @@ func MainCRouting(mainC int) ([]string, string) {
 		keyboard = []string{"меч", "лук", "Назад"}
 		message = "Вы выбрали категорию: Оружие"		
 		
-	case 2:
+	case 15:
 		keyboard = []string{"шлем", "доспехи", "Назад"}
 		message = "Вы выбрали категорию: Броня"
 		
-	case 3:
+	case 20:
 		keyboard = []string{"Кольцо", "Ожерелье", "Назад"}
 		message = "Вы выбрали категорию: Аксессуары"
 
