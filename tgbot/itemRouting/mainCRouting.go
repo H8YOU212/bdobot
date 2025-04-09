@@ -6,8 +6,16 @@ func MainCRouting(mainC int) ([]string, string) {
 	switch mainC {
 	case 1:
 		keyboard = []string{"меч", "лук", "Назад"}
-		message = "Вы выбрали категорию: Оружие"		
+		message = "Вы выбрали категорию: Оружие"
+
+	case 5: 
+		keyboard = []string{"Щит", "Кинжал", "Назад"}
+		message = "Вы выбрали категорию: Доп. Оружие"		
 		
+	case 10:
+		keyboard = []string{"Двуручный меч", "Коса", "Назад"}
+		message = "Вы выбрали категориюю: Пробужденное оружие"
+
 	case 15:
 		keyboard = []string{"шлем", "доспехи", "Назад"}
 		message = "Вы выбрали категорию: Броня"

@@ -93,10 +93,7 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 		keyboard = CreateKeyboard([]string{"Осн. оружие", "Броня", "Аксессуары", "Назад"}, 2)
 		message = "Выберите категорию предмета"
 
-	case "weapon":
-		keyboard = CreateKeyboard([]string{"Меч", "Назад"}, 2)
-		message = "Вы выбрали категорию: Оружие"
-
+	
 	case "MainCRouting":
 		buttons, message = itemrouting.MainCRouting(*indexMC)
 		keyboard = CreateKeyboard(buttons, 2)
@@ -136,11 +133,16 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "осн. оружие_callback":
 		nextState = "MainCRouting"
 		*indexMC = 1
-
+	case "доп.оружие_callback":
+		nextState = "MainCRouting"
+		*indexMC = 5
+	case "Пробужд. Оружие":
+		nextState = "MainCRouting"
+		*indexMC = 10
 	case "броня_callback":
 		nextState = "MainCRouting"
 		*indexMC = 15
-	case "бижутерия_callback":
+	case "аксессуары_callback":
 		nextState = "MainCRouting"
 		*indexMC = 20
 
@@ -149,6 +151,18 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		nextState = "SubCRouting"
 		*indexSC = 1
 	case "лук_callback":
+		nextState = "SubCRouting"
+		*indexSC = 2
+	case "щит_callback":
+		nextState = "SubCRouting"
+		*indexSC = 1
+	case "кинжал_callback":
+		nextState = "SubCRouting"
+		*indexSC = 2
+	case "двуручный меч_callback":
+		nextState = "SubCRouting"
+		*indexSC = 1
+	case "коса_callback":
 		nextState = "SubCRouting"
 		*indexSC = 2
 	case "шлем_callback":
