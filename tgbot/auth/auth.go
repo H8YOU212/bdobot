@@ -32,11 +32,11 @@ func (u *User) CheckAuth(chatID int64) (bool, error) {
 
 }
 
-func( u *User ) Auth(chatID int64, name string ) User {
+func( u *User ) Auth(chatID int64, name string) User {
 	db.Conn()
 	defer db.Dconn()
 	u.name = name 
-	db.Insert("users", "name", )
+	db.Insert("users", "name",)
 
 	return User{}
 }
