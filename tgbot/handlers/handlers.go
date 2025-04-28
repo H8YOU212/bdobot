@@ -1,16 +1,12 @@
 package handlers
 
 import (
-	"bdobot/utils"
-	"fmt"
 	"log"
 	"strings"
-	"sync"
-	"time"
-
-	ba "bdobot/bdoapi"
+	
 	"bdobot/tgbot/chatstate"
 	"bdobot/tgbot/itemRouting"
+	"bdobot/tgbot/auth"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -32,6 +28,8 @@ type Config struct {
 	Token string
 }
 
+type user auth.User
+
 type MessageHandler func(*tgbotapi.Message)
 
 var ( 
@@ -42,6 +40,8 @@ var (
 		subC int
 	})
 )
+
+
 var indexMC = new(int)
 var indexSC = new(int)
 var curIndex = new(int)
@@ -54,6 +54,8 @@ func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	default:
 		log.Printf("unknown command: %v\n", commandName)
 	}
+
+	if chatstate.
 }
 
 func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
@@ -65,7 +67,7 @@ func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	chatState := chatstate.GetInstance()
 	chatState.InitState(chatID, "start")
 
-	keyboard := CreateKeyboard([]string{"Поиск предмета", "предметы на отслеж."}, 2)
+	keyboard := CreateKeyboard([]string{"Поиск предмета", "предметы на отслеж.", "Авторизация"}, 2)
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Привет! Я бот для поиска и отслеживания цен предметов в игре Black Desert Online")
 
 	msg.ReplyMarkup = keyboard
@@ -78,6 +80,7 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 	var buttons []string
 	var keyboard tgbotapi.InlineKeyboardMarkup
 	// items := new([]ba.Item)
+	
 
 
 	// curIndex := new(int)
@@ -93,6 +96,11 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 		keyboard = CreateKeyboard([]string{"Осн. оружие", "Броня", "Аксессуары", "Назад"}, 2)
 		message = "Выберите категорию предмета"
 
+	case "auth":
+		
+	case "specItems":
+		
+		
 	
 	case "MainCRouting":
 		buttons, message = itemrouting.MainCRouting(*indexMC)
@@ -127,6 +135,9 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "поиск предмета_callback":
 		nextState = "search"
 	case "предметы на отслеж._callback":
+		nextState = "specItems"
+	case "авторизация_callback":
+		nextState = "auth"
 
 
 	//--------------------------------MainCategories--------------------------------
@@ -205,141 +216,6 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
-
-func ItemRouting(bot *tgbotapi.BotAPI, update tgbotapi.Update, mainC int, subC int) {
-	chatID := update.CallbackQuery.Message.Chat.ID
-	callbackdata := update.CallbackQuery.Data 
-
-	_, exists := categoryCashe[chatID]
-	if !exists {
-		categoryCashe[chatID] = struct{
-			mainC int
-			subC int
-		}{
-			mainC: mainC,
-			subC: subC,
-		}
-	}
-
-	category := categoryCashe[chatID]
-
-	items, exists := itemCache[chatID]
-	if !exists || len(items) == 0 {
-		log.Println("items cache is empty")
-		newItems, err := FillItems(chatID, category.mainC, category.subC )
-		if err != nil {
-			fmt.Println("Error to fillItems")
-			return 
-		}
-		itemCache[chatID] = newItems
-		items = newItems
-	}
-
-	var newIndex int
-
-	if update.CallbackQuery != nil {
-		switch callbackdata {
-		case "Предыдущий_callback":
-			newIndex = defineItemIndex(chatID, "prev")
-		case "Следующий_callback":
-			newIndex = defineItemIndex(chatID, "next")
-		default:
-			ItemOP(bot, update, items, newIndex)
-			return
-		}
-		
-		ItemOP(bot, update, items, newIndex)
-		
-	}
-}
-
-func defineItemIndex(chatID int64, direction string) int {
-	curIndex, exists := itemIndexMap[chatID]
-	if !exists {
-		curIndex = 0
-	}
-
-	switch direction {
-	case "prev":
-		if curIndex > 0 {
-			curIndex--
-		}
-	case "next":
-		if curIndex < 0 {
-			curIndex++
-		}	
-	} 
-
-	itemIndexMap[chatID] = curIndex
-	return curIndex
-}
-
-func ItemOP(bot *tgbotapi.BotAPI, update tgbotapi.Update, items []Item, curIndex int) {
-	defer utils.TimeIt(time.Now(), "ItemOP") // Start timer
-
-	if curIndex < 0 || curIndex >= len(items) {
-		log.Println("Invalid item index")
-		return
-	}
-
-	currentItem := items[curIndex]
-
-	bodyMsg := fmt.Sprintf("Id предмета: %v, \nНазвание предмета: %v, \nЦена предмета: %v", currentItem.ID, currentItem.Name, currentItem.Price)
-
-	keyboard := CreateKeyboard(switchKeyboard, 3)
-
-	EditMessage(update, bot, bodyMsg, keyboard)
-}
-
-func FillItems(chatID int64, mainC int, subC int) ([]Item, error) {
-	defer utils.TimeIt(time.Now(), "FillItems") // Start timer
-
-	
-	bdoItems, err := ba.GetWorldMarketList(mainC, subC)
-	if err != nil {
-		return nil, err
-	}
-
-	items := make([]Item, len(bdoItems))
-	var wg sync.WaitGroup
-	errChan := make(chan error, len(bdoItems))
-
-	for i, bdoItem := range bdoItems {
-		wg.Add(1)
-
-		go func(i int, bdoItem ba.Item) {
-			defer wg.Done()
-
-			latestPrice, err := ba.GetLatestPrice(bdoItem.ID, 0)
-			if err != nil {
-				log.Printf("Failed to get price for item %d: %v", bdoItem.ID, err)
-				errChan <- err
-				return
-			}
-
-			items[i] = Item{
-				ID:    bdoItem.ID,
-				Name:  bdoItem.Name,
-				Price: latestPrice,
-			}
-		}(i, bdoItem)
-	}
-
-	wg.Wait()
-	close(errChan)
-
-	if len(errChan) > 0 {
-		return nil, fmt.Errorf("some items failed to load")
-	}
-
-	if len(items) < 1 {
-		log.Println("error fill items")
-		return nil, fmt.Errorf("error fill items")
-	}
-
-	return items, nil
-
-}
 
 var startkeyboard = []string{
 	"Поиск предмета", "Отслеж. Товары",
