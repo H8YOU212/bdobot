@@ -1,7 +1,24 @@
 package db
 
-type User struct{
-	id int64		`bson:"id"`
-	is_Auth bool	`bson:"is_Auth"`
-	name string		`bson:"name"`
+import (
+	// b "bdobot/bdoapi"
+
+	// "go.mongodb.org/mongo-driver/mongo"
+)
+
+type User struct {
+	ID              int64      `bson:"id"`
+	Name            string   `bson:"name"`
+	ItemsOnSpec     []ItemSpec `bson:"itemsOnSpec"`
 }
+
+type ItemSpec struct {
+	ID    int    `bson:"id"`
+	Name  string `bson:"name"`
+	Price int    `bson:"price"`
+	ItemStartPrice int `bson:"itemStartPrice"`
+	ItemTargetPrice int `bson:"itemEndPrice"`
+}
+
+// var client *mongo.Client
+// var usersCollection *mongo.Collection

@@ -20,7 +20,7 @@ var (
 	})
 )
 
-func DefineItem(curIndex *int, mainC int, subC int) string {
+func DefineItem(curIndex *int, mainC int, subC int) (string, bdoapi.Item) {
 	items, err := FillItems(mainC, subC)
 	if err != nil {
 		log.Println(err)
@@ -28,7 +28,7 @@ func DefineItem(curIndex *int, mainC int, subC int) string {
 	if *curIndex >= 0 && *curIndex < len(items) {
 		item := items[*curIndex]
 		message := fmt.Sprintf(fmt.Sprintf("Id предмета: %v, \nНазвание предмета: %v, \nЦена предмета: %v", item.ID, item.Name, item.Price))
-		return message
+		return message, item
 	}
-	return "errIndex"
+	return "errIndex", bdoapi.Item{}
 }

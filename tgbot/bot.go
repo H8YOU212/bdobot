@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	//bdoapi "bdobot/bdoapi"
+	"bdobot/db"
 	h "bdobot/tgbot/handlers"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -29,6 +29,14 @@ func StartTelegramBotLoop() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
+
+	if err := db.Conn(); err != nil {
+		log.Fatalf("Ошибка при подключении к базе данных: %v", err)
+	}
+	
+	if _, err := db.GetUsersCollection(); err != nil {
+		log.Fatalf("Ошибка подключения к коллекции пользователей: %v", err)
+	}
 
 	for update := range updates {
 		if update.Message != nil {
