@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -13,12 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	client          *mongo.Client
-	usersCollection *mongo.Collection
-	connectOnce     sync.Once
-	connectErr      error
-)
+
 
 func Connect() error {
 	connectOnce.Do(func() {
@@ -84,9 +78,4 @@ func Conn() error {
 	return nil
 }
 
-func GetUsersCollection() (*mongo.Collection, error) {
-	if usersCollection == nil {
-		return nil, fmt.Errorf("коллекция пользователей не инициализирована")
-	}
-	return usersCollection, nil
-}
+
