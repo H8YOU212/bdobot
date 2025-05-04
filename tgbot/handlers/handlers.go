@@ -51,6 +51,7 @@ var item = new(b.Item)
 var indexMC = new(int)
 var indexSC = new(int)
 var curIndex = new(int)
+var curItem = new(db.ItemSpec)
 
 func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
     
@@ -122,7 +123,7 @@ func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	bot.Request(msg)
 }
 
-func HandlePrice(bot *tgbotapi.BotAPI, update tgbotapi.Update,state string, targetPrice int, chatID int64) {
+func HandlePrice(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, targetPrice int, chatID int64) {
 
 	isr.AddNewItem(chatID, targetPrice, *item)
 	
@@ -154,7 +155,7 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 	
 	case "specItems":
 		keyboard = CreateKeyboard([]string{"Предыдущий", "Удалить", "Следующий", "Назад"}, 3)
-		message = isr.GetSpcItms(chatID, curIndex)
+		message, *curItem = isr.GetSpcItms(chatID, curIndex)
 
 	//ItemRouting
 	case "MainCRouting":
@@ -164,6 +165,7 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 	case "SubCRouting":
 		buttons, message, (*item) = itemrouting.SubCRouting(*indexMC, *indexSC, curIndex)
 		keyboard = CreateKeyboard(buttons, 3)
+
 	// SwitchRouting
 	case "switchRouting":
 		if lastState == "SubCRouting"{
@@ -172,17 +174,19 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 		keyboard = CreateKeyboard(buttons, 3)
 		} else if lastState == "specItems" {
 			keyboard = CreateKeyboard([]string{"Предыдущий", "Удалить", "Следующий", "Назад"}, 3)
-			message = isr.GetSpcItms(chatID, curIndex)
+			message, *curItem = isr.GetSpcItms(chatID, curIndex)
 		}
+
 	case "AddSpecItem":
 		itemrout = true
 		// message = "Введите грейд предмета"
 		// EditMessageWoutMarkup(update, bot, message)
 		
 		EditMessageWoutMarkup(update, bot, "Введите желаемую цену для уведомления")
-		
 
-
+	case "deleteSpecItem":
+		itemrout = true
+		isr.DeleteSpecItem(chatID, curItem)
 	}
 
 	if itemrout != true && switchRout != true {

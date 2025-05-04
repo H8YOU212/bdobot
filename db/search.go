@@ -3,6 +3,7 @@ package db
 import (
 	// db "bdobot/db/connect"
 	"context"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,4 +45,11 @@ func UserExists(userID int64) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func GetUsersCollection() (*mongo.Collection, error) {
+	if usersCollection == nil {
+		return nil, fmt.Errorf("коллекция пользователей не инициализирована")
+	}
+	return usersCollection, nil
 }
