@@ -231,7 +231,7 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "аксессуары_callback":
 		nextState = "MainCRouting"
 		*indexMC = 20
-
+		
 	//--------------------------------SubCatogories------------------------------
 	case "меч_callback":
 		nextState = "SubCRouting"
