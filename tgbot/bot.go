@@ -5,7 +5,10 @@ import (
 	"os"
 
 	"bdobot/db"
+<<<<<<< HEAD
 	logfdb "bdobot/log"
+=======
+>>>>>>> 9be488aea94c1413369e94a894e34809c64c28f3
 	h "bdobot/tgbot/handlers"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -34,7 +37,11 @@ func StartTelegramBotLoop() {
 	if err := db.Conn(); err != nil {
 		log.Fatalf("Ошибка при подключении к базе данных: %v", err)
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> 9be488aea94c1413369e94a894e34809c64c28f3
 	if _, err := db.GetUsersCollection(); err != nil {
 		log.Fatalf("Ошибка подключения к коллекции пользователей: %v", err)
 	}
@@ -47,6 +54,9 @@ func StartTelegramBotLoop() {
 			// we're making chatState with mutex, so it **SHOULD** be good
 			go h.HandleCallback(bot, update)
 		}
+<<<<<<< HEAD
 		logfdb.Logtg()
+=======
+>>>>>>> 9be488aea94c1413369e94a894e34809c64c28f3
 	}
 }
