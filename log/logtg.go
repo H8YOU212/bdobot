@@ -1,0 +1,7 @@
+package log
+
+
+
+func logtg() {
+
+}
