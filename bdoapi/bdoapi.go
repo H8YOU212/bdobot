@@ -39,7 +39,7 @@ func GetWorldMarketList(mainCategory int, subCategory int) ([]Item, error) {
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "BlackDdesert")
+	req.Header.Add("User-Agent", "BlackDesert")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("Ошибка при выполнении запроса:", err)

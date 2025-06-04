@@ -24,6 +24,7 @@ func Delete(chatid int64, itemSpec ItemSpec) {
 				"price":			itemSpec.Price,
 				"itemStartPrice":	itemSpec.ItemStartPrice,
 				"itemEndPrice":		itemSpec.ItemTargetPrice,
+				"method":			itemSpec.Method,
 			},
 		},
 	}

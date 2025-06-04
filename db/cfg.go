@@ -9,17 +9,18 @@ import (
 )
 
 type User struct {
-	ID          int64      `bson:"id"`
-	Name        string     `bson:"name"`
-	ItemsOnSpec []ItemSpec `bson:"itemsOnSpec"`
+	ID          int64      		`bson:"id"`
+	Name        string     		`bson:"name"`
+	ItemsOnSpec []ItemSpec 		`bson:"itemsOnSpec"`
 }
 
 type ItemSpec struct {
-	ID              int    `bson:"id"`
-	Name            string `bson:"name"`
-	Price           int    `bson:"price"`
-	ItemStartPrice  int    `bson:"itemStartPrice"`
-	ItemTargetPrice int    `bson:"itemEndPrice"`
+	ID              int    		`bson:"id"`
+	Name            string 		`bson:"name"`
+	Price           int			`bson:"price"`
+	ItemStartPrice  int			`bson:"itemStartPrice"`
+	ItemTargetPrice int			`bson:"itemEndPrice"`
+	Method 			int			`bson:"method"`
 }
 
 var (
