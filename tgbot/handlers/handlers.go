@@ -45,7 +45,6 @@ var (
 	})
 )
 
-
 var targetprice int
 var item = new(b.Item)
 var indexMC = new(int)
@@ -54,49 +53,48 @@ var curIndex = new(int)
 var curItem = new(db.ItemSpec)
 
 func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
-    
+
 	var err error
 	var chatID int64
-    var commandName string
+	var commandName string
 	chatState := chatstate.GetInstance()
-	
 
-    if update.Message != nil { // Проверяем, что это текстовое сообщение
-        chatID = update.Message.Chat.ID
-        commandName = update.Message.Command()
-    } else if update.CallbackQuery != nil { // Проверяем, что это callback-запрос
-        chatID = update.CallbackQuery.Message.Chat.ID
-    } else {
-        log.Println("Неизвестный тип обновления")
-        return
-    }
+	if update.Message != nil { // Проверяем, что это текстовое сообщение
+		chatID = update.Message.Chat.ID
+		commandName = update.Message.Command()
+	} else if update.CallbackQuery != nil { // Проверяем, что это callback-запрос
+		chatID = update.CallbackQuery.Message.Chat.ID
+	} else {
+		log.Println("Неизвестный тип обновления")
+		return
+	}
 	lastState := chatState.GetLastState(chatID)
 
-    baseUser := db.User{
-        ID:             chatID,
-        Name:           update.Message.From.UserName,
-        ItemsOnSpec:    []db.ItemSpec{},
-    }
+	baseUser := db.User{
+		ID:          chatID,
+		Name:        update.Message.From.UserName,
+		ItemsOnSpec: []db.ItemSpec{},
+	}
 
-    switch commandName {
-    case "start":
-        HandleStart(bot, update)
-        exists, err := db.UserExists(chatID)
-        if err != nil {
-            log.Printf("Ошибка проверки пользователя: %v", err)
-            return
-        }
-        if !exists {
-            db.InsertUser(baseUser)
-        }
-    default:
-        log.Printf("Неизвестная команда: %v\n", commandName)
-    }
+	switch commandName {
+	case "start":
+		HandleStart(bot, update)
+		exists, err := db.UserExists(chatID)
+		if err != nil {
+			log.Printf("Ошибка проверки пользователя: %v", err)
+			return
+		}
+		if !exists {
+			db.InsertUser(baseUser)
+		}
+	default:
+		log.Printf("Неизвестная команда: %v\n", commandName)
+	}
 
-	if lastState == "AddSpecItem"{
+	if lastState == "AddSpecItem" {
 		messageText := update.Message.Text
 		targetprice, err = strconv.Atoi(messageText)
-		if err != nil{
+		if err != nil {
 			log.Println("Ошибка преобразования str to int")
 		}
 		chatState.PushState(chatID, "setTargetPrice")
@@ -116,7 +114,7 @@ func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	chatState := chatstate.GetInstance()
 	chatState.InitState(chatID, "start")
 
-	keyboard := CreateKeyboard([]string{"Поиск предмета", "предметы на отслеж."/*, "Мой Профиль"*/}, 2)
+	keyboard := CreateKeyboard([]string{"Поиск предмета", "предметы на отслеж." /*, "Мой Профиль"*/}, 2)
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Привет! Я бот для поиска и отслеживания цен предметов в игре Black Desert Online")
 
 	msg.ReplyMarkup = keyboard
@@ -126,7 +124,7 @@ func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 func HandlePrice(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, targetPrice int, chatID int64) {
 
 	isr.AddNewItem(chatID, targetPrice, *item)
-	
+
 }
 
 func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, indexMC *int, indexSC *int, curIndex *int, chatID int64) {
@@ -152,7 +150,7 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 	case "search":
 		keyboard = CreateKeyboard([]string{"Осн. оружие", "Броня", "Аксессуары", "Назад"}, 2)
 		message = "Выберите категорию предмета"
-	
+
 	case "specItems":
 		keyboard = CreateKeyboard([]string{"Предыдущий", "Удалить", "Следующий", "Назад"}, 3)
 		message, *curItem = isr.GetSpcItms(chatID, curIndex)
@@ -168,10 +166,10 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 
 	// SwitchRouting
 	case "switchRouting":
-		if lastState == "SubCRouting"{
-		buttons, message, (*item) = itemrouting.SubCRouting(*indexMC, *indexSC, curIndex)
-		// switchRout = true
-		keyboard = CreateKeyboard(buttons, 3)
+		if lastState == "SubCRouting" {
+			buttons, message, (*item) = itemrouting.SubCRouting(*indexMC, *indexSC, curIndex)
+			// switchRout = true
+			keyboard = CreateKeyboard(buttons, 3)
 		} else if lastState == "specItems" {
 			keyboard = CreateKeyboard([]string{"Предыдущий", "Удалить", "Следующий", "Назад"}, 3)
 			message, *curItem = isr.GetSpcItms(chatID, curIndex)
@@ -181,7 +179,7 @@ func StateRouter(bot *tgbotapi.BotAPI, update tgbotapi.Update, state string, ind
 		itemrout = true
 		// message = "Введите грейд предмета"
 		// EditMessageWoutMarkup(update, bot, message)
-		
+
 		EditMessageWoutMarkup(update, bot, "Введите желаемую цену для уведомления")
 
 	case "deleteSpecItem":
@@ -231,7 +229,7 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "аксессуары_callback":
 		nextState = "MainCRouting"
 		*indexMC = 20
-		
+
 	//--------------------------------SubCatogories------------------------------
 	case "меч_callback":
 		nextState = "SubCRouting"
@@ -264,7 +262,7 @@ func HandleCallback(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	case "доспехи_callback":
 		nextState = "SubCRouting"
 		*indexSC = 2
-		
+
 	case "кольцо_callback":
 		nextState = "SubCRouting"
 		*indexSC = 1
@@ -353,7 +351,7 @@ func EditMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string, k
 
 }
 
-func EditMessageWoutMarkup( update tgbotapi.Update, bot *tgbotapi.BotAPI, message string) {
+func EditMessageWoutMarkup(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string) {
 	var err error
 	editMsg := tgbotapi.NewEditMessageText(update.CallbackQuery.Message.Chat.ID,
 		update.CallbackQuery.Message.MessageID,

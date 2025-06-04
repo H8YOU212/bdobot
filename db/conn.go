@@ -7,12 +7,12 @@ import (
 	"os"
 	"time"
 
+	"bdobot/log"
+
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-
 
 func Connect() error {
 	connectOnce.Do(func() {
@@ -61,6 +61,7 @@ func Conn() error {
 	// Чтение имени базы данных и коллекции из переменных окружения
 	db := os.Getenv("dbname")
 	coll := os.Getenv("collname")
+	logcoll := "logCollection"
 	if db == "" || coll == "" {
 		log.Println("Ошибка: не указаны имя базы данных или имя коллекции")
 		return fmt.Errorf("не указаны имя базы данных или коллекции")
@@ -74,8 +75,8 @@ func Conn() error {
 		return fmt.Errorf("не удалось инициализировать коллекцию %s в базе данных %s", coll, db)
 	}
 
+	logCollection = client.Database(db).Collection(logcoll)
+
 	log.Println("Коллекция пользователей инициализирована успешно")
 	return nil
 }
-
-
