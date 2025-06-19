@@ -16,6 +16,7 @@ type User struct {
 
 type ItemSpec struct {
 	ID              int    		`bson:"id"`
+	SID				int			`bson:"sid"`	
 	Name            string 		`bson:"name"`
 	Price           int			`bson:"price"`
 	ItemStartPrice  int			`bson:"itemStartPrice"`
@@ -26,6 +27,7 @@ type ItemSpec struct {
 var (
 	client          *mongo.Client
 	usersCollection *mongo.Collection
+	logCollection	*mongo.Collection
 	connectOnce     sync.Once
 	connectErr      error
 )

@@ -17,7 +17,7 @@ func GetSpcItms(id int64, curIndex *int) (string, db.ItemSpec) {
 
 	if *curIndex >= 0 && *curIndex < len(specitems) {
 		item := specitems[*curIndex]
-		message = fmt.Sprintf(fmt.Sprintf("Id предмета: %v, \nНазвание предмета: %v, \nЦена предмета: %v, \nНачальная Цена: %v, \nПлановая цена %v", item.ID, item.Name, item.Price, item.ItemStartPrice, item.ItemTargetPrice))
+		message = fmt.Sprintf("Id предмета: %v, \ngradelvl: %v, \nНазвание предмета: %v, \nЦена предмета: %v, \nНачальная Цена: %v, \nПлановая цена %v", item.ID, item.SID, item.Name, item.Price, item.ItemStartPrice, item.ItemTargetPrice)
 		return message, item
 	}
 	return "", db.ItemSpec{}

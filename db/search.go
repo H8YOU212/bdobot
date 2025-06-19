@@ -53,3 +53,30 @@ func GetUsersCollection() (*mongo.Collection, error) {
 	}
 	return usersCollection, nil
 }
+
+
+func GetAllUsers() ([]User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	defer cancel()
+
+	cursor , err := usersCollection.Find(ctx, bson.M{})
+	if err != nil{
+		return nil, err	
+	}
+	defer cursor.Close(ctx)
+	
+	var users []User
+
+	for cursor.Next(ctx) {
+		var user User
+		if err := cursor.Decode(&user); err != nil{
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err := cursor.Err(); err != nil{
+		return nil, err
+	}
+	
+	return users, nil
+}

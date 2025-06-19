@@ -19,3 +19,7 @@ func UpdateUserItems(id int, newItems []int) error {
 	_, err := usersCollection.UpdateOne(ctx, filter, update)
 	return err
 }
+
+func Update_logs(filter interface{}, doc interface{}) {
+	
+}

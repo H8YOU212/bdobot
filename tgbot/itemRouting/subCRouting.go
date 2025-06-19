@@ -4,14 +4,14 @@ import b "bdobot/bdoapi"
 
 
 
-func SubCRouting(mainC int, subC int, curIndex *int) ([]string, string, b.Item) {
+func SubCRouting(mainC int, subC int, curIndex *int, sid int) ([]string, string, b.Item) {
 	var keyboard []string
 	var message string
 	// var item b.Item
-	message, item := DefineItem(curIndex, mainC, subC)
+	message, item := DefineItem(curIndex, mainC, subC, sid)
 
 	keyboard = []string{
-		"Предыдущий", "отслеживание", "Следующий", "Назад",
+		"Предыдущий", "отслеживание", "Следующий", "", "установить sid", "", "Назад",
 	}
 	return keyboard, message, item
 

@@ -29,3 +29,7 @@ func AddItemToSpecItems(userID int64, newItem ItemSpec) error {
 	_, err := usersCollection.UpdateOne(ctx, filter, update)
 	return err
 }
+
+func InsertLogs(logapi interface{}, logdb interface{}, logtg interface{}) {
+	
+}

@@ -1,0 +1,5 @@
+package logfdb
+
+func Globallog() {
+	
+}

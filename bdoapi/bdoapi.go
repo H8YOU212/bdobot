@@ -1,6 +1,7 @@
 package bdoapi
 
 import (
+	logfdb "bdobot/logger"
 	"bdobot/utils"
 	"encoding/json"
 	"fmt"
@@ -12,25 +13,7 @@ import (
 
 const baseUrl = "https://api.arsha.io"
 
-type Item struct {
-	ID    int    `json:"id"`
-	Sid   int    `json:"sid"`
-	Name  string `json:"name"`
-	Price int    `json:"price"`
-	// BasePrice    int            `json:"basePrice"`
-	// History      map[string]int `json:"history"`
-	// MainCategory int            `json:"mainCategory"`
-	// SubCategory  int            `json:"subCategory"`
-	// PriceMin     int            `json:"priceMin"`
-	// PriceMax     int            `json:"priceMax"`
-}
 
-type MarketPriceInfo struct {
-	Name    string         `json:"name"`
-	ID      int            `json:"id"`
-	Sid     int            `json:"sid"`
-	History map[string]int `json:"history"` // История цен в виде карты (timestamp -> цена)
-}
 
 func GetWorldMarketList(mainCategory int, subCategory int) ([]Item, error) {
 	defer utils.TimeIt(time.Now(), "GetWorldMarketList")
@@ -100,6 +83,8 @@ func GetMarketPriceInfo(id int, sid int) (map[string]int, error) {
 		fmt.Println("Error parse data")
 		return nil, err
 	}
+
+	logfdb.Logapi(url, string(body))
 
 	return MarketPriceInfo.History, nil
 

@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-func FillItems(mainC int, subC int) ([]b.Item, error) {
+func FillItems(mainC int, subC int, sid int) ([]b.Item, error) {
 	bdoItems, err := b.GetWorldMarketList(mainC, subC)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func FillItems(mainC int, subC int) ([]b.Item, error) {
 		go func(i int, bdoItem b.Item) {
 			defer wg.Done()
 
-			latestPrice, err := b.GetLatestPrice(bdoItem.ID, 0)
+			latestPrice, err := b.GetLatestPrice(bdoItem.ID, sid)
 			if err != nil {
 				log.Printf("Failed to get price for item %d: %v", bdoItem.ID, err)
 				errChan <- err

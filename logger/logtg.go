@@ -1,7 +1,6 @@
-package log
+package logfdb
 
 
-
-func logtg() {
-
+func Logtg(conn interface{}) {
+	
 }

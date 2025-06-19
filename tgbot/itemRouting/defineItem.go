@@ -20,14 +20,14 @@ var (
 	})
 )
 
-func DefineItem(curIndex *int, mainC int, subC int) (string, bdoapi.Item) {
-	items, err := FillItems(mainC, subC)
+func DefineItem(curIndex *int, mainC int, subC int, sid int) (string, bdoapi.Item) {
+	items, err := FillItems(mainC, subC, sid)
 	if err != nil {
 		log.Println(err)
 	}
 	if *curIndex >= 0 && *curIndex < len(items) {
 		item := items[*curIndex]
-		message := fmt.Sprintf(fmt.Sprintf("Id предмета: %v, \nНазвание предмета: %v, \nЦена предмета: %v", item.ID, item.Name, item.Price))
+		message := fmt.Sprintf("Id предмета: %v, \nНазвание предмета: %v, \nЦена предмета: %v", item.ID, item.Name, item.Price)
 		return message, item
 	}
 	return "errIndex", bdoapi.Item{}
