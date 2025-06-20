@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	b "bdobot/bdoapi"
 	"bdobot/db"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -51,13 +52,14 @@ var indexMC = new(int)
 var indexSC = new(int)
 var curIndex = new(int)
 var curItem = new(db.ItemSpec)
+var usernames = new([]string)
 
 func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	var err error
 	var chatID int64
 	var commandName string
-	
+
 	chatState := chatstate.GetInstance()
 
 	if update.Message != nil { // Проверяем, что это текстовое сообщение
@@ -88,10 +90,11 @@ func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		if !exists {
 			db.InsertUser(baseUser)
 		}
+	case "Users":
+
 	default:
 		log.Printf("Неизвестная команда: %v\n", commandName)
 	}
-
 
 	if lastState == "AddSpecItem" {
 		messageText := update.Message.Text
@@ -126,7 +129,28 @@ func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		// keyboard = CreateKeyboard(buttons, 3)
 		// StateRouter(bot, update, "search", indexMC, indexSC, curIndex, chatID)
 	}
-	
+
+}
+
+func HandleFakeNotify(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	message := update.Message
+	chatID := message.Chat.ID
+
+	chatstate := chatstate.GetInstance()
+	chatstate.InitState(chatID, "user-managment")
+
+	users, err := db.GetAllUsers()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if chatID == 1441415359 {
+		fake_notify(users)
+	} else {
+		msg := tgbotapi.NewMessage(chatID, "Вы не администратор")
+		bot.Request(msg)
+	}
 }
 
 func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
@@ -365,42 +389,42 @@ func CreateKeyboard(buttons []string, buttonsPerRow int) tgbotapi.InlineKeyboard
 }
 
 func EditMessage(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string, keyboard tgbotapi.InlineKeyboardMarkup) {
-    var err error
+	var err error
 
-    if update.CallbackQuery == nil  {
-        log.Printf("EditMessage: CallbackQuery = nil")
-        return
-    }
+	if update.CallbackQuery == nil {
+		log.Printf("EditMessage: CallbackQuery = nil")
+		return
+	}
 
 	if update.CallbackQuery.Message == nil {
-        log.Printf("EditMessage: Message равен nil")
-        return
-    }
+		log.Printf("EditMessage: Message равен nil")
+		return
+	}
 
 	if update.CallbackQuery.Message.Chat == nil {
-        log.Printf("EditMessage: Chat равен nil")
-        return
-    }
+		log.Printf("EditMessage: Chat равен nil")
+		return
+	}
 
-    editMsg := tgbotapi.NewEditMessageText(
-        update.CallbackQuery.Message.Chat.ID,
-        update.CallbackQuery.Message.MessageID,
-        message,
-    )
-    editMarkup := tgbotapi.NewEditMessageReplyMarkup(
-        update.CallbackQuery.Message.Chat.ID,
-        update.CallbackQuery.Message.MessageID,
-        keyboard,
-    )
-    _, err = bot.Request(editMsg)
-    if err != nil {
-        log.Printf("Ошибка при изменении сообщения: %v", err)
-        return
-    }
-    _, err = bot.Request(editMarkup)
-    if err != nil {
-        log.Printf("Ошибка при изменении сообщения: %v", err)
-    }
+	editMsg := tgbotapi.NewEditMessageText(
+		update.CallbackQuery.Message.Chat.ID,
+		update.CallbackQuery.Message.MessageID,
+		message,
+	)
+	editMarkup := tgbotapi.NewEditMessageReplyMarkup(
+		update.CallbackQuery.Message.Chat.ID,
+		update.CallbackQuery.Message.MessageID,
+		keyboard,
+	)
+	_, err = bot.Request(editMsg)
+	if err != nil {
+		log.Printf("Ошибка при изменении сообщения: %v", err)
+		return
+	}
+	_, err = bot.Request(editMarkup)
+	if err != nil {
+		log.Printf("Ошибка при изменении сообщения: %v", err)
+	}
 }
 
 func EditMessageWoutMarkup(update tgbotapi.Update, bot *tgbotapi.BotAPI, message string) {
